@@ -48,5 +48,5 @@ std::string transformChar(const char in_char)
     }
 
         // If the character isn't alphabetic or numeric, DONT add it
-    return 0;
+    return inputText;
 }

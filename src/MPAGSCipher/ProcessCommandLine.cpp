@@ -9,7 +9,10 @@ bool processCommandLine(const std::vector<std::string>& args,
                         bool& helpRequested,
                         bool& versionRequested,
                         std::string& inputFileName,
-                        std::string& outputFileName ){
+                        std::string& outputFileName,
+                        std::string& inputText_Cipher,
+                        std::string& key,
+                        bool& encrypt){
 
     const std::size_t nCmdLineArgs{args.size()};
 
@@ -47,7 +50,25 @@ bool processCommandLine(const std::vector<std::string>& args,
                 outputFileName = args[i + 1];
                 ++i;
             }
-        } else {
+        } else if (args[i] == "-input_Cipher"){
+            inputText_Cipher = args[i+1];
+            ++i;
+        } else if (args[i] == "-key"){
+            key = args[i+1];
+            ++i;
+        } else if (args[i] == "-encrypt"){
+            if(args[i+1] == "1")
+            {
+                encrypt = true;
+            }
+            else if (args[i+1] == "0")
+            {
+                encrypt = false;
+            }
+            //encrypt = args[i+1];
+            ++i;
+        }
+        else {
             // Have an unknown flag to output error message and return non-zero
             // exit status to indicate failure
             std::cerr << "[error] unknown argument '" << args[i]
@@ -55,7 +76,5 @@ bool processCommandLine(const std::vector<std::string>& args,
             return false;
         }
     }
-
-
     return true;
 }

@@ -2,16 +2,24 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "TransformChar.hpp"
 #include "ProcessCommandLine.hpp"
+#include "CaesarCipher.hpp"
 
 std::string transformChar(const char in);
 bool processCommandLine(const std::vector<std::string>& args,
                         bool& helpRequested,
                         bool& versionRequested,
                         std::string& inputFileName,
-                        std::string& outputFileName );
+                        std::string& outputFileName, 
+                        const std::string& inputText_Cipher,
+                        const std::string& key,
+                        const bool& encrypt);
+
+std::string runCaesarCipher( const std::string& inputText_Cipher,
+const size_t key, const bool encrypt );
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +32,11 @@ int main(int argc, char* argv[])
     std::string inputFile{""}; 
     std::string outputFile{""};
 
-    if (!processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile ))
+    std::string inputText_Cipher{""};
+    std::string key{""};
+    bool encrypt{true};
+
+    if (!processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile, inputText_Cipher, key, encrypt))
     {
         return 1;
     }
@@ -55,36 +67,55 @@ int main(int argc, char* argv[])
         std::cout << "0.1.0" << std::endl;
         return 0;
     }
-
+    //char inputChar {'x'};
     // Initialise variables
-    char inputChar{'x'};
     std::string inputText;
 
     // Read in user input from stdin/file
     // Warn that input file option not yet implemented
     if (!inputFile.empty()) {
-        std::cerr << "[warning] input from file ('" << inputFile
-                  << "') not implemented yet, using stdin\n";
+
+        std::string name {inputFile};
+        std::ifstream in_file {name};
+        bool ok_to_read = in_file.good();
+        if (ok_to_read == true){
+            char inputChar {'x'};
+            while (in_file >> inputChar) {
+                inputText += transformChar(inputChar);
+            }
+        }
+        else if(!ok_to_read){
+            std::cerr << "Unable to open file" << std::endl;
+            return 1;
+        }
+    }
+    else {
+            char inputChar{'x'};
+            while (std::cin >> inputChar) {
+                inputText += transformChar(inputChar);
+            }
     }
 
-    // loop over each character from user input
-    while (std::cin >> inputChar) {
-        inputText += transformChar(inputChar);
-    }
 
-    // Print out the transliterated text
 
-    // Warn that output file option not yet implemented
     if (!outputFile.empty()) {
-        std::cerr << "[warning] output to file ('" << outputFile
-                  << "') not implemented yet, using stdout\n";
+        std::string name2 {outputFile};
+        std::ofstream out_file {name2, std::ios::app};
+        bool ok_to_write2 = out_file.good();
+        if (ok_to_write2 == true){
+            out_file << inputText << std::endl;
+        }
+        else if (!ok_to_write2){
+            std::cerr << "Unable to open file" << std::endl;
+            return 1;
+        }
     }
-
-    std::cout << inputText << std::endl;
-
-
-
-    // No requirement to return from main, but we do so for clarity
-    // and for consistency with other functions
+    else {
+        std::cout << inputText << std::endl;
+    }
+    
+    //std::cout << "Do you want to encrypt? Write 1 for encrypt and 0 for decrypt" << std::endl;
+    //std::cin >> encrypt;
+    runCaesarCipher(inputText_Cipher, std::stoul(key), encrypt);
     return 0;
 }
